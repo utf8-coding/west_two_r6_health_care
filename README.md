@@ -7,7 +7,8 @@ application with competition pourpose.</br>
 with competition pourpose.</br>
 competition pourpose.</br>
 pourpose.</br>
-.
+.</br>
 
 
-` Want to do more animation next time!
+
+> Want to do more animation next time! 
