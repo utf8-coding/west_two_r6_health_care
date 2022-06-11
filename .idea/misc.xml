@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_baseline_arrow_back_ios_24.xml" value="0.1605" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_health_thermometer.xml" value="0.34" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_launcher_background.xml" value="0.178" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_navigation_health_24.xml" value="0.293" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_round_arrow_back_ios_24.xml" value="0.1605" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ic_round_favorite_24.xml" value="0.1945" />
+        <entry key="..\:/study/healthcare/app/src/main/res/drawable/ripple_item_click.xml" value="0.148" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_article_reading.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_article_search.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_collection.xml" value="0.1890625" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_launcher.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_login.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_main.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/activity_med_search.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/content_login.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/fragment_base.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/fragment_health.xml" value="0.25" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/fragment_heath.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/fragment_info.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/fragment_mine.xml" value="0.5" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_article_reading.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_article_reading_comment.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_article_reading_leave_comment.xml" value="0.67" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_article_reading_text.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_health_epidemic.xml" value="0.5" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_health_heart_rate.xml" value="0.2" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_health_life_index.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_health_weather.xml" value="0.3609375" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_info_content.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_info_header.xml" value="0.33" />
+        <entry key="..\:/study/healthcare/app/src/main/res/layout/item_med_search.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/menu/main_navigation_menu.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/menu/med_search_popup_filter_menu.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/menu/menu_article_reading_top_bar.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/menu/menu_article_reading_top_bar_imcollcted.xml" value="0.3619791666666667" />
+        <entry key="..\:/study/healthcare/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2535" />
+        <entry key="..\:/study/healthcare/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2535" />
+        <entry key="..\:/study/healthcare/app/src/main/res/xml/network_config.xml" value="0.3619791666666667" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
