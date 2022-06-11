@@ -1,10 +1,10 @@
 # west_two_r6_health_care
-just a demo stage application with competition pourpose.
-a demo stage application with competition pourpose.
-demo stage application with competition pourpose.
-stage application with competition pourpose.
-application with competition pourpose.
-with competition pourpose.
-competition pourpose.
-pourpose.
+just a demo stage application with competition pourpose.</br>
+a demo stage application with competition pourpose.</br>
+demo stage application with competition pourpose.</br>
+stage application with competition pourpose.</br>
+application with competition pourpose.</br>
+with competition pourpose.</br>
+competition pourpose.</br>
+pourpose.</br>
 .
