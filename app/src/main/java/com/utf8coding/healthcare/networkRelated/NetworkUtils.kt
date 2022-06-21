@@ -24,6 +24,51 @@ object NetworkUtils {
         fun onWrongUser()
         fun onWrongPassword()
     }
+    private fun login(userName: String, passWord: String, listener: LoginNetListener, timeOut: Long){
+        getGeneralAppService(timeOut).login(userName, passWord).enqueue(object : Callback<NetWorkResponse<UserData>> {
+            override fun onResponse(
+                call: Call<NetWorkResponse<UserData>>,
+                response: Response<NetWorkResponse<UserData>>
+            ) {
+                val loginResponse = response.body()
+                if (loginResponse != null) {
+                    when (loginResponse.code) {
+                        200 -> {
+                            val cookie = response.headers().get("Set-Cookie")
+                            MyApplication.context.getSharedPreferences("userData", Context.MODE_PRIVATE).edit()
+                                .putString("userName", userName)
+                                .putString("passWord", passWord)
+                                .putInt("userId", loginResponse.data.id)
+                                .putString("userHeadUri", loginResponse.data.headUri)
+                                .apply()
+                            MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("cookie", cookie).apply()
+                            val prefCookie = MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("cookie", "")
+                            makeILog("login success! cookie:$cookie prefCookie: $prefCookie")
+                            listener.onSuccess()
+                        }
+                        2007 -> {
+                            makeILog("wrong user name!")
+                            listener.onWrongUser()
+                        }
+                        2003 -> {
+                            makeILog("wrong pass!")
+                            listener.onWrongPassword()
+                        }
+                        else -> {
+                            makeILog("login other code")
+                        }
+                    }
+                } else {
+                    makeILog("empty response while logging in?")
+                    listener.onFailure()
+                }
+            }
+            override fun onFailure(call: Call<NetWorkResponse<UserData>>, t: Throwable) {
+                makeWLog("network failure! $t")
+                listener.onFailure()
+            }
+        })
+    }
     fun login(userName: String, passWord: String, listener: LoginNetListener){
         getGeneralAppService().login(userName, passWord).enqueue(object : Callback<NetWorkResponse<UserData>> {
             override fun onResponse(
@@ -478,10 +523,36 @@ object NetworkUtils {
                 chain.proceed(request)
             }.build()
     }
+    private fun generateClient(timeOut: Long): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(timeOut, TimeUnit.MILLISECONDS)
+            .readTimeout(timeOut, TimeUnit.MILLISECONDS)
+            .addInterceptor { chain ->
+                var cookie = MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("cookie", "")
+                if (cookie == null){
+                    cookie = ""
+                    Log.e("NetworkUtils:", "null token!!")
+                }
+                val request: Request = chain.request()
+                    .newBuilder()
+                    .addHeader("Cookie", cookie)
+                    .build()
+                chain.proceed(request)
+            }.build()
+    }
+
     private fun getGeneralAppService(): NetworkService {
         val retrofit = Retrofit.Builder()
             .baseUrl("http://123.57.213.188:8000/")
             .client(generateClient())
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+        return retrofit.create(NetworkService::class.java)
+    }
+    private fun getGeneralAppService(timeOut: Long): NetworkService {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://123.57.213.188:8000/")
+            .client(generateClient(timeOut))
             .addConverterFactory(GsonConverterFactory.create())
             .build()
         return retrofit.create(NetworkService::class.java)
@@ -493,16 +564,19 @@ object NetworkUtils {
     }
 
     //check netWork:
-    fun isNetworkConnected(context: Context?): Boolean {
-        if (context != null) {
-            val mConnectivityManager = context
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val mNetworkInfo = mConnectivityManager.activeNetworkInfo
-            if (mNetworkInfo != null) {
-                return mNetworkInfo.isAvailable
+    fun isNetworkConnected(listener: SuccessFailListener) {
+        login("A", "123123", object: LoginNetListener{
+            override fun onSuccess() {
+                listener.onSuccess()
             }
-        }
-        return false
+            override fun onFailure() {
+                listener.onFail()
+            }
+            override fun onWrongUser() {
+            }
+            override fun onWrongPassword() {
+            }
+        }, 500)
     }
 
     //tools:

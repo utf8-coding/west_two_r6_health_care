@@ -1,14 +1,19 @@
 package com.utf8coding.healthcare.activities.secondary
 
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ConcatAdapter
@@ -17,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.slider.Slider
+import com.utf8coding.healthcare.MyApplication
 import com.utf8coding.healthcare.R
 import com.utf8coding.healthcare.adapters.article_reading.ArticleReadingCommentAdapter
 import com.utf8coding.healthcare.adapters.article_reading.ArticleReadingLeaveCommentAdapter
@@ -49,6 +56,18 @@ class ArticleReadingActivity : AppCompatActivity() {
         get() {
             return findViewById(R.id.toolbar)
         }
+    private val textSizeSlider: Slider
+        get() {
+            return findViewById(R.id.textSizeSlider)
+        }
+    private val closeTextSizeButton: ImageButton
+        get() {
+            return findViewById(R.id.closeTextSizeButton)
+        }
+    private val textSizeCard: CardView
+        get() {
+            return findViewById(R.id.textSizeCard)
+        }
     private var articleData: ArticleData = ArticleData(0, "出错了", "出错了", null)
     private val commentListForRecyclerView = arrayListOf<CommentData>()
     private var readingTextAdapter = ArticleReadingTextAdapter(articleData)
@@ -65,6 +84,20 @@ class ArticleReadingActivity : AppCompatActivity() {
 
         articleData = intent.getSerializableExtra("articleData") as ArticleData
 
+        closeTextSizeButton.setOnClickListener {
+            textSizeCard.animate().alpha(0f).setListener(object: Animator.AnimatorListener{
+                override fun onAnimationStart(animation: Animator?) {
+                }
+                override fun onAnimationEnd(animation: Animator?) {
+                    textSizeCard.visibility = View.INVISIBLE
+                }
+                override fun onAnimationCancel(animation: Animator?) {
+                }
+                override fun onAnimationRepeat(animation: Animator?) {
+                }
+            })
+        }
+
         initCollapsingBarLayout()
 
         initCollectButton()
@@ -72,7 +105,10 @@ class ArticleReadingActivity : AppCompatActivity() {
         intiCollectButtonLogic()
 
         initRecyclerView()
+
+        initTextSizeSlider()
     }
+
 
     override fun onDestroy() {
         if (viewModel.isCollected.value!!){
@@ -121,9 +157,11 @@ class ArticleReadingActivity : AppCompatActivity() {
                     object : ArticleReadingLeaveCommentAdapter.ArticleLeaveCommentListener {
                         override fun onSendCommentAndUnfocus(content: String) {
                             viewModel.sendComment(content,  articleData.id)
-                            Toast.makeText(this@ArticleReadingActivity, "已发送，请稍等审核！", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@ArticleReadingActivity,
+                                "已发送，请稍等审核！", Toast.LENGTH_SHORT).show()
                             val manager: InputMethodManager =
-                                applicationContext.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                                applicationContext
+                                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                             manager.hideSoftInputFromWindow(
                                 currentFocus!!.windowToken,
                                 InputMethodManager.HIDE_NOT_ALWAYS
@@ -141,7 +179,14 @@ class ArticleReadingActivity : AppCompatActivity() {
                 )
             }
         }
+        recyclerView.outlineSpotShadowColor = resources.getColor(R.color.active_green_light)
+    }
 
+    private fun initTextSizeSlider(){
+        textSizeSlider.value = 20f
+        textSizeSlider.addOnChangeListener{ _, value, _ ->
+            readingTextAdapter.setTextSize(value)
+        }
     }
 
     private fun intiCollectButtonLogic(){
@@ -151,13 +196,13 @@ class ArticleReadingActivity : AppCompatActivity() {
                     viewModel.isCollected.value = !viewModel.isCollected.value!!
                     viewModel.isCollected.value?.let { isCollected ->
                         if (isCollected) {
-                            toolBar.menu.getItem(0).icon =
+                            toolBar.menu.getItem(1).icon =
                                 ResourcesCompat.getDrawable(
                                     resources,
                                     R.drawable.ic_round_favorite_24, null
                                 )
                         } else {
-                            toolBar.menu.getItem(0).icon =
+                            toolBar.menu.getItem(1).icon =
                                 ResourcesCompat.getDrawable(
                                     resources,
                                     R.drawable.ic_baseline_favorite_border_24, null
@@ -165,6 +210,19 @@ class ArticleReadingActivity : AppCompatActivity() {
                         }
                     }
 
+                    true
+                }
+                R.id.textSize -> {
+                    textSizeCard.alpha = 0f
+                    textSizeCard.visibility = View.VISIBLE
+                    textSizeCard.animate()
+                        .setListener(object: Animator.AnimatorListener{
+                            override fun onAnimationStart(animation: Animator?) {}
+                            override fun onAnimationEnd(animation: Animator?) {}
+                            override fun onAnimationCancel(animation: Animator?) {}
+                            override fun onAnimationRepeat(animation: Animator?) {}
+                        })
+                        .alpha(1f)
                     true
                 }
                 else -> false
@@ -175,13 +233,13 @@ class ArticleReadingActivity : AppCompatActivity() {
     private fun initCollectButton(){
         viewModel.getIsCollected(articleData).observe(this) { isCollected ->
             if (isCollected) {
-                toolBar.menu.getItem(0).icon =
+                toolBar.menu.getItem(1).icon =
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_round_favorite_24, null
                     )
             } else {
-                toolBar.menu.getItem(0).icon =
+                toolBar.menu.getItem(1).icon =
                     ResourcesCompat.getDrawable(
                         resources,
                         R.drawable.ic_baseline_favorite_border_24, null

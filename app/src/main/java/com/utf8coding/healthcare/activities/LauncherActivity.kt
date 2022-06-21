@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.utf8coding.healthcare.R
+import com.utf8coding.healthcare.networkRelated.NetWorkResponse
 import com.utf8coding.healthcare.networkRelated.NetworkUtils
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
@@ -22,6 +23,7 @@ class LauncherActivity : BaseActivity() {
         get() {
             return findViewById(R.id.skipButton) as Button
         }
+    private var isConnection = false
     private var isAutoStart = true
     private var countDown = 3
 
@@ -29,6 +31,7 @@ class LauncherActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
         Glide.with(this).load("https://s1.ax1x.com/2022/04/07/qz31zt.jpg").into(launcherImageView)
+        checkConnectivity()
         //跳过倒计时按钮逻辑：
         skipButton.setOnClickListener{
             isAutoStart = false
@@ -54,10 +57,20 @@ class LauncherActivity : BaseActivity() {
         }
     }
 
+    private fun checkConnectivity(){
+        NetworkUtils.isNetworkConnected(object: NetworkUtils.SuccessFailListener{
+            override fun onSuccess() {
+                isConnection = true
+            }
+            override fun onFail() {
+                isConnection = false
+            }
+        })
+    }
+
     //启动不同Activity的方法：
     private fun startNextActivity(){
-        Log.e("launcher activity:", "connected? ${NetworkUtils.isNetworkConnected(this)}")
-        if (NetworkUtils.isNetworkConnected(this)) {
+        if (isConnection) {
             val pref = this.getSharedPreferences("userData", Context.MODE_PRIVATE)
             val userName = pref.getString("userName", "")?: ""
             val passWord = pref.getString("passWord", "")?: ""

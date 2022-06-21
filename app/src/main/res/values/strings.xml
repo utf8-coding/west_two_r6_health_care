@@ -54,4 +54,7 @@
     <string name="当前心率">当前心率：</string>
     <string name="今日最高心率">今日最高心率：</string>
     <string name="今日最高低心率">今日最高低心率：</string>
+    <string name="调节字体大小">调节字体大小</string>
+    <string name="小">小</string>
+    <string name="大">大</string>
 </resources>

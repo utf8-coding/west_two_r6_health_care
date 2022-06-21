@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/textSize"
+        android:icon="@drawable/ic_baseline_format_size_24"
+        android:title="@string/like"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/collect"
         android:icon="@drawable/ic_baseline_favorite_border_24"
         android:title="@string/like"
