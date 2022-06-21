@@ -11,4 +11,14 @@
         android:icon="@drawable/ic_baseline_favorite_border_24"
         android:title="@string/like"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/readPu"
+        android:icon="@drawable/ic_voice_prompt_pu"
+        android:title="@string/普通话朗读"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/readMin"
+        android:icon="@drawable/ic_voice_prompt_min"
+        android:title="@string/闽南话朗读"
+        app:showAsAction="always" />
 </menu>

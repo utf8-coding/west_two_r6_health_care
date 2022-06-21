@@ -1,7 +1,6 @@
 package com.utf8coding.healthcare.networkRelated
 
 import android.content.Context
-import android.net.ConnectivityManager
 import android.util.Log
 import com.utf8coding.healthcare.MyApplication
 import com.utf8coding.healthcare.data.*
@@ -24,7 +23,7 @@ object NetworkUtils {
         fun onWrongUser()
         fun onWrongPassword()
     }
-    private fun login(userName: String, passWord: String, listener: LoginNetListener, timeOut: Long){
+    private fun testingLogin(userName: String, passWord: String, listener: LoginNetListener, timeOut: Long){
         getGeneralAppService(timeOut).login(userName, passWord).enqueue(object : Callback<NetWorkResponse<UserData>> {
             override fun onResponse(
                 call: Call<NetWorkResponse<UserData>>,
@@ -34,16 +33,6 @@ object NetworkUtils {
                 if (loginResponse != null) {
                     when (loginResponse.code) {
                         200 -> {
-                            val cookie = response.headers().get("Set-Cookie")
-                            MyApplication.context.getSharedPreferences("userData", Context.MODE_PRIVATE).edit()
-                                .putString("userName", userName)
-                                .putString("passWord", passWord)
-                                .putInt("userId", loginResponse.data.id)
-                                .putString("userHeadUri", loginResponse.data.headUri)
-                                .apply()
-                            MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("cookie", cookie).apply()
-                            val prefCookie = MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("cookie", "")
-                            makeILog("login success! cookie:$cookie prefCookie: $prefCookie")
                             listener.onSuccess()
                         }
                         2007 -> {
@@ -565,7 +554,7 @@ object NetworkUtils {
 
     //check netWork:
     fun isNetworkConnected(listener: SuccessFailListener) {
-        login("A", "123123", object: LoginNetListener{
+        testingLogin("A", "123123", object: LoginNetListener{
             override fun onSuccess() {
                 listener.onSuccess()
             }
