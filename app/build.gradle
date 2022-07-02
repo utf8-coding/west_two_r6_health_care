@@ -5,7 +5,7 @@ plugins {
 
 android {
     compileSdk 32
-    buildToolsVersion '33 rc3'
+    buildToolsVersion '33.0.0'
 
     defaultConfig {
         applicationId "com.utf8coding.healthcare"

@@ -12,26 +12,22 @@ class HealthFragmentViewModel : ViewModel() {
     var epidemicData: MutableLiveData<EpidemicData> = MutableLiveData()
 
     fun getLifeIndex(): MutableLiveData<LifeIndexData>{
-        NetworkUtils.getLifeIndex(object: NetworkUtils.LifeIndexNetListener{
-            override fun onSuccess(mLifeIndexData: LifeIndexData) {
+        NetworkUtils.getLifeIndex(
+            onSuccess = { mLifeIndexData: LifeIndexData ->
                 lifeIndexData.value = mLifeIndexData
-            }
-            override fun onFail() {
+            },
+            onFailure = {
                 lifeIndexData.value = GenerateTestContentUtils.generateLifeIndexData()
             }
-        })
+        )
         return lifeIndexData
     }
     
     fun getEpidemic(): MutableLiveData<EpidemicData>{
-        NetworkUtils.getEpidemicData(object: NetworkUtils.EpidemicNetListener{
-            override fun onSuccess(mEpidemicData: EpidemicData) {
-                epidemicData.value = mEpidemicData
-            }
-            override fun onFail() {
-                epidemicData.value = GenerateTestContentUtils.generateEpidemicData()
-            }
-        })
+        NetworkUtils.getEpidemicData(
+            onSuccess = { mEpidemicData: EpidemicData -> epidemicData.value = mEpidemicData },
+            onFailure = { epidemicData.value = GenerateTestContentUtils.generateEpidemicData() }
+        )
         return epidemicData
     }
 }

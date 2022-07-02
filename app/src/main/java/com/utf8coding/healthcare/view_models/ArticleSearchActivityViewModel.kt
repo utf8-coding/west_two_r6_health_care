@@ -11,15 +11,8 @@ class ArticleSearchActivityViewModel: ViewModel() {
     val articleList: MutableLiveData<ArrayList<ArticleData>> = MutableLiveData(ArrayList())
 
     fun getResultMedList(searchText: String) {
-        NetworkUtils.searchArticleByKey(searchText, object: NetworkUtils.ArticleListener{
-            override fun onSuccess(articleList: java.util.ArrayList<ArticleData>) {
-                this@ArticleSearchActivityViewModel.articleList.value = articleList
-            }
-
-            override fun onFail() {
-                Toast.makeText(MyApplication.context, "网络出错了，请重试", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+        NetworkUtils.searchArticleByKey(searchText) {
+            this@ArticleSearchActivityViewModel.articleList.value = it
+        }
     }
 }

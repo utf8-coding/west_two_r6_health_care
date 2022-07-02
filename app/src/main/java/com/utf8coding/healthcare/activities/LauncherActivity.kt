@@ -6,9 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.utf8coding.healthcare.R
-import com.utf8coding.healthcare.networkRelated.NetWorkResponse
 import com.utf8coding.healthcare.networkRelated.NetworkUtils
 import java.lang.Thread.sleep
 import kotlin.concurrent.thread
@@ -58,14 +58,14 @@ class LauncherActivity : BaseActivity() {
     }
 
     private fun checkConnectivity(){
-        NetworkUtils.isNetworkConnected(object: NetworkUtils.SuccessFailListener{
-            override fun onSuccess() {
+        NetworkUtils.isNetworkConnected(
+            onSuccess = {
                 isConnection = true
-            }
-            override fun onFail() {
+            },
+            onFailure = {
                 isConnection = false
             }
-        })
+        )
     }
 
     //启动不同Activity的方法：
@@ -74,7 +74,7 @@ class LauncherActivity : BaseActivity() {
             val pref = this.getSharedPreferences("userData", Context.MODE_PRIVATE)
             val userName = pref.getString("userName", "")?: ""
             val passWord = pref.getString("passWord", "")?: ""
-            val id = pref.getInt("id", -1)?: -1
+            val id = pref.getInt("id", -1)
             Log.i("launcher activity:", "auto logging in, userName: $userName, password: $passWord, id: $id")
             if (userName != "" && passWord != ""){
                 NetworkUtils.login(userName, passWord, object: NetworkUtils.LoginNetListener{

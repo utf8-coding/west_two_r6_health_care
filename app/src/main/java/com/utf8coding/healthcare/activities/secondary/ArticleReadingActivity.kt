@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -216,12 +217,7 @@ class ArticleReadingActivity : AppCompatActivity() {
                     textSizeCard.alpha = 0f
                     textSizeCard.visibility = View.VISIBLE
                     textSizeCard.animate()
-                        .setListener(object: Animator.AnimatorListener{
-                            override fun onAnimationStart(animation: Animator?) {}
-                            override fun onAnimationEnd(animation: Animator?) {}
-                            override fun onAnimationCancel(animation: Animator?) {}
-                            override fun onAnimationRepeat(animation: Animator?) {}
-                        })
+                        .setListener(EmptyAnimationListener())
                         .alpha(1f)
                     true
                 }
@@ -246,5 +242,12 @@ class ArticleReadingActivity : AppCompatActivity() {
                     )
             }
         }
+    }
+
+    inner class EmptyAnimationListener: Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator?) {}
+        override fun onAnimationEnd(animation: Animator?) {}
+        override fun onAnimationCancel(animation: Animator?) {}
+        override fun onAnimationRepeat(animation: Animator?) {}
     }
 }

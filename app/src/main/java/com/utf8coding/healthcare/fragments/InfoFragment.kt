@@ -47,10 +47,6 @@ class InfoFragment : BaseFragment() {
         get() {
             return view?.findViewById(R.id.loadingHeader)
         }
-    private val loadingFooter: ClassicsFooter?
-        get() {
-            return view?.findViewById(R.id.loadingFooter)
-        }
 
     private var medSearchButton: ImageView? = null
     private var articleSearchButton: ImageView? = null
@@ -132,12 +128,7 @@ class InfoFragment : BaseFragment() {
                                 startActivity(Intent(activity, MedSearchActivity::class.java), bundle)
 
                                 //重置监听器防BUG
-                                medSearchButton!!.animate().setListener(object: Animator.AnimatorListener{
-                                    override fun onAnimationStart(animation: Animator?) {}
-                                    override fun onAnimationEnd(animation: Animator?) {}
-                                    override fun onAnimationCancel(animation: Animator?) {}
-                                    override fun onAnimationRepeat(animation: Animator?) {}
-                                })
+                                medSearchButton!!.animate().setListener(EmptyAnimationListener())
                             }
                             override fun onAnimationCancel(animation: Animator?) {}
                             override fun onAnimationRepeat(animation: Animator?) {}
@@ -164,12 +155,7 @@ class InfoFragment : BaseFragment() {
                             startActivity(Intent(activity, ArticleSearchActivity::class.java), bundle)
 
                             //重置监听器防BUG
-                            articleSearchButton!!.animate().setListener(object: Animator.AnimatorListener{
-                                override fun onAnimationStart(animation: Animator?) {}
-                                override fun onAnimationEnd(animation: Animator?) {}
-                                override fun onAnimationCancel(animation: Animator?) {}
-                                override fun onAnimationRepeat(animation: Animator?) {}
-                            })
+                            articleSearchButton!!.animate().setListener(EmptyAnimationListener())
                         }
                         override fun onAnimationCancel(animation: Animator?) {}
                         override fun onAnimationRepeat(animation: Animator?) {}
@@ -216,5 +202,12 @@ class InfoFragment : BaseFragment() {
     }
     private fun makeILog(msg: String) {
         Log.i("InfoFragment:", msg)
+    }
+
+    inner class EmptyAnimationListener: Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator?) {}
+        override fun onAnimationEnd(animation: Animator?) {}
+        override fun onAnimationCancel(animation: Animator?) {}
+        override fun onAnimationRepeat(animation: Animator?) {}
     }
 }

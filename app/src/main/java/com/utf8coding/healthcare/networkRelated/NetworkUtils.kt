@@ -104,18 +104,11 @@ object NetworkUtils {
         })
     }
 
-
-    interface SuccessFailListener {
-        fun onSuccess()
-        fun onFail()
-    }
-
     //生活指数
-    interface LifeIndexNetListener{
-        fun onSuccess(mLifeIndexData: LifeIndexData)
-        fun onFail()
-    }
-    fun getLifeIndex(listener: LifeIndexNetListener){
+    fun getLifeIndex(
+        onSuccess: (lifeIndexData: LifeIndexData) -> Unit,
+        onFailure: () -> Unit
+    ){
         val retrofit = Retrofit.Builder()
             .baseUrl("http://a30163f799.51vip.biz/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -129,13 +122,13 @@ object NetworkUtils {
                 val lifeIndexData = response.body()
                 if (lifeIndexData != null){
                     makeILog("response success, login response: $lifeIndexData")
-                    listener.onSuccess(lifeIndexData)
+                    onSuccess(lifeIndexData)
                 } else {
                     makeILog("empty response! get epidemic response: $lifeIndexData")
                 }
             }
             override fun onFailure(call: Call<LifeIndexData>, t: Throwable) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("connection failed!!")
             }
@@ -143,11 +136,10 @@ object NetworkUtils {
     }
 
     //疫情信息
-    interface EpidemicNetListener{
-        fun onSuccess(mEpidemicData: EpidemicData)
-        fun onFail()
-    }
-    fun getEpidemicData(listener: EpidemicNetListener){
+    fun getEpidemicData(
+        onSuccess: (mEpidemicData: EpidemicData) -> Unit,
+        onFailure: () -> Unit
+    ){
         val retrofit = Retrofit.Builder()
             .baseUrl("http://a30163f799.51vip.biz/")
             .client(generateClient())
@@ -162,13 +154,13 @@ object NetworkUtils {
                 val epidemicData = response.body()
                 if (epidemicData != null){
                     makeILog("total success, epidemicData: $epidemicData")
-                    listener.onSuccess(epidemicData)
+                    onSuccess(epidemicData)
                 } else {
                     makeILog("empty response! epidemicData $epidemicData")
                 }
             }
             override fun onFailure(call: Call<EpidemicData>, t: Throwable) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("connection failed!!")
             }
@@ -214,12 +206,11 @@ object NetworkUtils {
             makeWLog("id is empty or null when get articles")
         }
     }
-    interface ArticleListener{
-        fun onSuccess(articleList: ArrayList<ArticleData>)
-        fun onFail()
-    }
-    fun getSuggestedArticle(userId: Int, listener: ArticleListener){
-       getGeneralAppService().getSuggestedArticle(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>> {
+    fun getSuggestedArticle(userId: Int,
+                            onSuccess: (mArticleDataList: ArrayList<ArticleData>) -> Unit,
+                            onFailure: () -> Unit
+                            ){
+        getGeneralAppService().getSuggestedArticle(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>> {
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.EssayList>>
             ) {
@@ -227,23 +218,23 @@ object NetworkUtils {
                 if (articleDataList == null) {
                     makeWLog("null article list body?")
                 } else {
-                    listener.onSuccess(articleDataList.essayList)
+                    onSuccess(articleDataList.essayList)
                     makeILog("get articleData list success ${articleDataList.essayList.size}")
                 }
             }
-
             override fun onFailure(
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 t: Throwable
             ) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("suggestion article list getting failed!!")
             }
         })
     }
-    fun searchArticleByKey(searchKey: String, listener: ArticleListener){
-       getGeneralAppService().searchArticle(searchKey).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>>{
+
+    fun searchArticleByKey(searchKey: String, onSuccess: (ArrayList<ArticleData>) -> Unit){
+        getGeneralAppService().searchArticle(searchKey).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 response: Response<NetWorkResponse<NetWorkResponse.EssayList>>
@@ -251,7 +242,7 @@ object NetworkUtils {
                 val body = response.body()
                 if (body != null){
                     val articleList = body.data.essayList
-                    listener.onSuccess(articleList)
+                    onSuccess(articleList)
                     makeILog("getSearched article success: $articleList")
                 } else {
                     makeWLog("search article by key empty response body!")
@@ -261,27 +252,22 @@ object NetworkUtils {
             override fun onFailure(
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 t: Throwable
-            ) {
-                makeWLog("search article net failed!")
-            }
+            ) { makeWLog("search article net failed!") }
 
         })
     }
 
-    //收藏管理
-    interface CollectionCheckListener{
-        fun onSuccess(isCollected: Boolean)
-        fun onFailure()
-    }
-    fun getCollection(userId: Int, listener: ArticleListener){
-        fun fromCollectionListGetArticleList(collectionList: ArrayList<NetWorkResponse.Collection>, listener: ArticleListener){
+    //收藏管
+    fun getCollection(userId: Int, onSuccess: (mArticleList: ArrayList<ArticleData>) -> Unit, onFailure: () -> Unit){
+        //这里这样写是因为服务器只返回所收藏文章的ID列表，之后需要自行获取
+        fun fromCollectionListGetArticleList(collectionList: ArrayList<NetWorkResponse.Collection>, onFeedback: (mArticleList: ArrayList<ArticleData>) -> Unit){
             val list = ArrayList<ArticleData>()
             for (collection in collectionList){
                 getArticleById(collection.articleId, object: GetArticleByIdListener{
                     override fun onSuccess(articleData: ArticleData) {
                         list.add(articleData)
                         if (list.size == collectionList.size) {
-                            listener.onSuccess(list)
+                            onFeedback(list)
                         }
                     }
                     override fun onFail() {
@@ -297,13 +283,10 @@ object NetworkUtils {
             ) {
                 val body = response.body()
                 val collectionList = body?.data?.list ?: ArrayList()
-                fromCollectionListGetArticleList(collectionList, object: ArticleListener{
-                    override fun onSuccess(articleList: ArrayList<ArticleData>) {
-                        listener.onSuccess(articleList)
-                    }
-                    override fun onFail() {
-                    }
-                })
+                fromCollectionListGetArticleList(
+                    collectionList,
+                    onFeedback = { onSuccess(it) }
+                )
                 makeILog("get collection success: $collectionList")
             }
 
@@ -311,13 +294,13 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.CollectionList>>,
                 t: Throwable
             ) {
-                listener.onFail()
+                onFailure()
             }
 
         })
     }
-    //给后端减轻一点负担，进行一个类内部的回调了属于是（会导致列表无序，得加锁才能解决，但是速度会变慢。）
-    fun checkCollected(userId: Int, articleId: Int, listener: CollectionCheckListener){
+    //给后端减轻一点负担了，进行一个类内部的回调了（会导致列表无序，得加锁才能解决，但是速度会变慢。）
+    fun checkCollected(userId: Int, articleId: Int, onFeedBack: (isCollected: Boolean) -> Unit){
        getGeneralAppService().checkCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<Any>>,
@@ -325,7 +308,7 @@ object NetworkUtils {
             ) {
                 val body = response.body()
                 if (body != null){
-                    listener.onSuccess(body.message.toBoolean())
+                    onFeedBack(body.message.toBoolean())
                     makeILog("check is collected success: ${body.data}")
                 } else {
                     makeWLog("check isCollected null body!")
@@ -359,20 +342,14 @@ object NetworkUtils {
             ) {
                 makeILog("deleteCollection, success")
             }
-
             override fun onFailure(call: Call<NetWorkResponse<Any>>, t: Throwable) {
                 makeILog("deleteCollection, failed")
             }
-
         })
     }
 
     //搜索药物
-    interface MedListListener{
-        fun onSuccess(newMedList: ArrayList<MedData>)
-        fun onFail()
-    }
-    fun searchMedByName(medName: String, listener: MedListListener){
+    fun searchMedByName(medName: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
        getGeneralAppService().searchDrugByName(medName).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
@@ -381,23 +358,22 @@ object NetworkUtils {
                 if (medDataList == null){
                     makeWLog("null medData list body?")
                 } else {
-                    listener.onSuccess(medDataList.medList)
+                    onSuccess(medDataList.medList)
                     makeILog("get medData list success: ${medDataList.medList}")
                 }
             }
-
             override fun onFailure(
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
 
         })
     }
-    fun searchMedByType(medType: String, listener: MedListListener){
+    fun searchMedByType(medType: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
        getGeneralAppService().searchDrugByType(medType).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
@@ -406,7 +382,7 @@ object NetworkUtils {
                 if (medDataList == null){
                     makeWLog("null medData list body?")
                 } else {
-                    listener.onSuccess(medDataList.medList)
+                    onSuccess(medDataList.medList)
                     makeILog("get medData list success: ${medDataList.medList}")
                 }
             }
@@ -415,15 +391,16 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
 
         })
     }
-    fun searchMedByManufacturer(medManufacturer: String, listener: MedListListener){
+    fun searchMedByManufacturer(medManufacturer: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
        getGeneralAppService().searchDrugByMedManufacturer(medManufacturer).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
+
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
             ) {
@@ -431,7 +408,7 @@ object NetworkUtils {
                 if (medDataList == null){
                     makeWLog("null medData list body?")
                 } else {
-                    listener.onSuccess(medDataList.medList)
+                    onSuccess(medDataList.medList)
                     makeILog("get medData list success: ${medDataList.medList}")
                 }
             }
@@ -440,7 +417,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                listener.onFail()
+                onFailure()
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
@@ -449,11 +426,7 @@ object NetworkUtils {
     }
 
     //文章的评论之获取
-    interface CommentListListener{
-        fun onSuccess(newCommentList: ArrayList<CommentData>)
-        fun onFailure()
-    }
-    fun getComment(articleId: Int, listener: CommentListListener){
+    fun getComment(articleId: Int, onSuccess: (commentList: ArrayList<CommentData>) -> Unit, onFailure: () -> Unit){
         getGeneralAppService().getComments(articleId).enqueue(object: Callback<NetWorkResponse<NetWorkResponse.CommentList>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<NetWorkResponse.CommentList>>,
@@ -462,7 +435,7 @@ object NetworkUtils {
                 val mResponse = response
                 if (mResponse.body() != null){
                     val commentList = mResponse.body()!!.data.commentList
-                    listener.onSuccess(commentList)
+                    onSuccess(commentList)
                 } else {
                     makeWLog("get comment list null body?")
                 }
@@ -472,7 +445,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.CommentList>>,
                 t: Throwable
             ) {
-                listener.onFailure()
+                onFailure()
                 makeWLog("get comment list on net failure!")
             }
         })
@@ -547,19 +520,14 @@ object NetworkUtils {
         return retrofit.create(NetworkService::class.java)
     }
 
-
-    private fun onCookieFail(){
-
-    }
-
     //check netWork:
-    fun isNetworkConnected(listener: SuccessFailListener) {
+    fun isNetworkConnected(onSuccess: () -> Unit, onFailure: () -> Unit){
         testingLogin("A", "123123", object: LoginNetListener{
             override fun onSuccess() {
-                listener.onSuccess()
+                onSuccess()
             }
             override fun onFailure() {
-                listener.onFail()
+                onFailure()
             }
             override fun onWrongUser() {
             }

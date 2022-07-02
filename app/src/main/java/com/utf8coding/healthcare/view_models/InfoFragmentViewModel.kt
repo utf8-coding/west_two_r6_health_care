@@ -10,13 +10,7 @@ import com.utf8coding.healthcare.networkRelated.NetworkUtils
 class InfoFragmentViewModel: ViewModel() {
     var articleDataList: MutableLiveData<ArrayList<ArticleData>> = MutableLiveData(ArrayList())
     fun getArticleList(): MutableLiveData<ArrayList<ArticleData>>{
-        NetworkUtils.getSuggestedArticle(getUserId(), object: NetworkUtils.ArticleListener{
-            override fun onSuccess(articleList: ArrayList<ArticleData>) {
-                articleDataList.value = articleList
-            }
-            override fun onFail() {
-            }
-        })
+        NetworkUtils.getSuggestedArticle(getUserId(), { articleDataList.value = it }, {})
         return articleDataList
     }
 

@@ -19,38 +19,35 @@ class MedSearchActivityViewModel: ViewModel()  {
     var searchMode: Int = BY_NAME
     var medList: MutableLiveData<ArrayList<MedData>> = MutableLiveData<ArrayList<MedData>>(ArrayList())
 
-    //todo: 这里的加载绝对有BUG!!!（未知的重复调用observe，怀疑observe的调用）
+    //这里的加载有点BUG（未知的重复调用observe，怀疑observe的调用）
     fun getMedListByName(medName: String){
-        NetworkUtils.searchMedByName(medName, object: NetworkUtils.MedListListener{
-            override fun onSuccess(newMedList: ArrayList<MedData>) {
-                medList.value = newMedList
-            }
-            override fun onFail() {
+        NetworkUtils.searchMedByName(medName,
+            onSuccess = { mMedList: ArrayList<MedData> ->
+                medList.value = mMedList
+            },
+            onFailure = {
                 medList.value = ArrayList()
-            }
-        })
+            })
     }
 
     fun getMedListByType(medType: String){
-        NetworkUtils.searchMedByType(medType, object: NetworkUtils.MedListListener{
-            override fun onSuccess(newMedList: ArrayList<MedData>) {
-                medList.value = newMedList
+        NetworkUtils.searchMedByType(medType,
+            onSuccess = { mMedList: ArrayList<MedData> ->
+                medList.value = mMedList
             }
-            override fun onFail() {
+            , onFailure = {
                 medList.value = ArrayList()
-            }
-
-        })
+            })
     }
+
     fun getMedListByManufacturer(medManufacturer: String){
-        NetworkUtils.searchMedByManufacturer(medManufacturer, object: NetworkUtils.MedListListener{
-            override fun onSuccess(newMedList: ArrayList<MedData>) {
-                medList.value = newMedList
-            }
-            override fun onFail() {
+        NetworkUtils.searchMedByManufacturer(medManufacturer,
+            onSuccess = {mMedList: ArrayList<MedData> ->
+                medList.value = mMedList
+            },
+            onFailure = {
                 medList.value = ArrayList()
-            }
-        })
+            })
     }
 
 }

@@ -1,5 +1,6 @@
 package com.utf8coding.healthcare.view_models
 
+import android.app.PendingIntent
 import android.content.Context
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
@@ -14,16 +15,11 @@ class ArticleReadingActivityViewModel: ViewModel() {
     var commentData: MutableLiveData<ArrayList<CommentData>> = MutableLiveData<ArrayList<CommentData>>(ArrayList())
 
     fun getCommentList(articleData: ArticleData): MutableLiveData<ArrayList<CommentData>>{
-        NetworkUtils.getComment(articleData.id, object: NetworkUtils.CommentListListener{
-            override fun onSuccess(newCommentList: ArrayList<CommentData>) {
-                commentData.value = newCommentList
-            }
-
-            override fun onFailure() {
+        NetworkUtils.getComment(articleData.id,
+            onSuccess = { mCommentList: ArrayList<CommentData> -> commentData.value = mCommentList },
+            onFailure = {
                 Toast.makeText(MyApplication.context, "评论获取失败！", Toast.LENGTH_SHORT).show()
-            }
-
-        })
+            })
         return commentData
     }
 
@@ -36,13 +32,10 @@ class ArticleReadingActivityViewModel: ViewModel() {
     }
 
     fun getIsCollected(articleData: ArticleData): MutableLiveData<Boolean>{
-        NetworkUtils.checkCollected(getUserId(), articleData.id, object : NetworkUtils.CollectionCheckListener{
-            override fun onSuccess(mIsCollected: Boolean) {
-                isCollected.value = mIsCollected
-            }
-            override fun onFailure() {
-            }
-        })
+        NetworkUtils.checkCollected(getUserId(), articleData.id,
+            onFeedBack = {
+                isCollected.value = it
+            })
         return isCollected
     }
 
