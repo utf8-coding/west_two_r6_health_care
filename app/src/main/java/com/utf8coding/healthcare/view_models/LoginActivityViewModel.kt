@@ -19,7 +19,7 @@ class LoginActivityViewModel: ViewModel() {
     interface LoginListener{
         fun onResponse(conditionCode: Int)
     }
-    fun login(userName: String, passWord: String, listener: LoginListener, isForce: Boolean = false){
+    fun login(userName: String, passWord: String, listener: LoginListener){
         Log.i("LoginActivityViewModel:", "logging: $passWord, $userName")
         NetworkUtils.login(userName, passWord, object: NetworkUtils.LoginNetListener {
             override fun onSuccess() {

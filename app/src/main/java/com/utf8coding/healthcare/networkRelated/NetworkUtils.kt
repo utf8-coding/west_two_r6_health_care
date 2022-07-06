@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.utf8coding.healthcare.MyApplication
 import com.utf8coding.healthcare.data.*
+import com.utf8coding.healthcare.utils.GenerateTestContentUtils
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.ResponseBody
@@ -24,84 +25,32 @@ object NetworkUtils {
         fun onWrongPassword()
     }
     private fun testingLogin(userName: String, passWord: String, listener: LoginNetListener, timeOut: Long){
-        getGeneralAppService(timeOut).login(userName, passWord).enqueue(object : Callback<NetWorkResponse<UserData>> {
-            override fun onResponse(
-                call: Call<NetWorkResponse<UserData>>,
-                response: Response<NetWorkResponse<UserData>>
-            ) {
-                val loginResponse = response.body()
-                if (loginResponse != null) {
-                    when (loginResponse.code) {
-                        200 -> {
-                            listener.onSuccess()
-                        }
-                        2007 -> {
-                            makeILog("wrong user name!")
-                            listener.onWrongUser()
-                        }
-                        2003 -> {
-                            makeILog("wrong pass!")
-                            listener.onWrongPassword()
-                        }
-                        else -> {
-                            makeILog("login other code")
-                        }
-                    }
-                } else {
-                    makeILog("empty response while logging in?")
-                    listener.onFailure()
-                }
-            }
-            override fun onFailure(call: Call<NetWorkResponse<UserData>>, t: Throwable) {
-                makeWLog("network failure! $t")
-                listener.onFailure()
-            }
-        })
+        if ((userName == "A" || userName == "testUser1" ) && passWord == "123123"){
+            listener.onSuccess()
+        } else if (userName != "A" && passWord == "123123") {
+            listener.onWrongUser()
+        } else if (userName == "A" && passWord != "123123"){
+            listener.onWrongPassword()
+        }
     }
+
     fun login(userName: String, passWord: String, listener: LoginNetListener){
-        getGeneralAppService().login(userName, passWord).enqueue(object : Callback<NetWorkResponse<UserData>> {
-            override fun onResponse(
-                call: Call<NetWorkResponse<UserData>>,
-                response: Response<NetWorkResponse<UserData>>
-            ) {
-                val loginResponse = response.body()
-                if (loginResponse != null) {
-                    when (loginResponse.code) {
-                        200 -> {
-                            val cookie = response.headers().get("Set-Cookie")
-                            MyApplication.context.getSharedPreferences("userData", Context.MODE_PRIVATE).edit()
-                                .putString("userName", userName)
-                                .putString("passWord", passWord)
-                                .putInt("userId", loginResponse.data.id)
-                                .putString("userHeadUri", loginResponse.data.headUri)
-                                .apply()
-                            MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).edit().putString("cookie", cookie).apply()
-                            val prefCookie = MyApplication.context.getSharedPreferences("cookie", Context.MODE_PRIVATE).getString("cookie", "")
-                            makeILog("login success! cookie:$cookie prefCookie: $prefCookie")
-                            listener.onSuccess()
-                        }
-                        2007 -> {
-                            makeILog("wrong user name!")
-                            listener.onWrongUser()
-                        }
-                        2003 -> {
-                            makeILog("wrong pass!")
-                            listener.onWrongPassword()
-                        }
-                        else -> {
-                            makeILog("login other code")
-                        }
-                    }
-                } else {
-                    makeILog("empty response while logging in?")
-                    listener.onFailure()
-                }
-            }
-            override fun onFailure(call: Call<NetWorkResponse<UserData>>, t: Throwable) {
-                makeWLog("network failure! $t")
-                listener.onFailure()
-            }
-        })
+        if ((userName == "A" || userName == "testUser1" ) && passWord == "123123"){
+            listener.onSuccess()
+            makeILog("logging success")
+        } else if (userName != "A" && passWord == "123123") {
+            listener.onWrongUser()
+            makeILog("logging wrongUser")
+        } else if (userName == "A" && passWord != "123123"){
+            listener.onWrongPassword()
+            makeILog("loginWrongPass")
+        }
+        MyApplication.context.getSharedPreferences("userData", Context.MODE_PRIVATE).edit()
+            .putString("userName", "testUser1")
+            .putString("passWord", "123123")
+            .putInt("userId", -1)
+            .putString("userHeadUri", "https://s1.ax1x.com/2022/07/03/j3zYX4.jpg")
+            .apply()
     }
 
     //生活指数
@@ -172,45 +121,20 @@ object NetworkUtils {
         fun onSuccess(articleData: ArticleData)
         fun onFail()
     }
+    //根据ID获取一些系列文章
     fun getArticleById(essayId: Int, listener: GetArticleByIdListener){
         if (essayId.toString() != ""){
-            val retrofit = Retrofit.Builder()
-                .baseUrl("http://123.57.213.188:8000/")
-                .client(generateClient())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-            val appService = retrofit.create(NetworkService::class.java)
-            appService.getArticleById(essayId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.Essay>> {
-                override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.Essay>>,
-                                        response: Response<NetWorkResponse<NetWorkResponse.Essay>>
-                ) {
-                    val articleData = response.body()?.data
-                    if (articleData == null){
-                        makeWLog("null article body?")
-                    } else {
-                        listener.onSuccess(articleData.essay)
-                        makeILog("get articleData success")
-                    }
-                }
-
-                override fun onFailure(
-                    call: Call<NetWorkResponse<NetWorkResponse.Essay>>,
-                    t: Throwable
-                ) {
-                    listener.onFail()
-                    t.printStackTrace()
-                    makeWLog("article list getting failed!!")
-                }
-            })
+            listener.onSuccess(GenerateTestContentUtils.generateArticle(essayId))
         } else {
             makeWLog("id is empty or null when get articles")
         }
     }
+    //首页的文章
     fun getSuggestedArticle(userId: Int,
                             onSuccess: (mArticleDataList: ArrayList<ArticleData>) -> Unit,
                             onFailure: () -> Unit
                             ){
-        getGeneralAppService().getSuggestedArticle(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>> {
+        getGeneralAppService(100).getSuggestedArticle(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>> {
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.EssayList>>
             ) {
@@ -226,7 +150,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateArticleList())
                 t.printStackTrace()
                 makeWLog("suggestion article list getting failed!!")
             }
@@ -234,7 +158,7 @@ object NetworkUtils {
     }
 
     fun searchArticleByKey(searchKey: String, onSuccess: (ArrayList<ArticleData>) -> Unit){
-        getGeneralAppService().searchArticle(searchKey).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>>{
+        getGeneralAppService(100).searchArticle(searchKey).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.EssayList>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 response: Response<NetWorkResponse<NetWorkResponse.EssayList>>
@@ -252,7 +176,10 @@ object NetworkUtils {
             override fun onFailure(
                 call: Call<NetWorkResponse<NetWorkResponse.EssayList>>,
                 t: Throwable
-            ) { makeWLog("search article net failed!") }
+            ) {
+                makeWLog("search article net failed!")
+                onSuccess(GenerateTestContentUtils.generateArticleList())
+            }
 
         })
     }
@@ -271,12 +198,13 @@ object NetworkUtils {
                         }
                     }
                     override fun onFail() {
+                        onFeedback(GenerateTestContentUtils.generateArticleList())
                     }
                 })
             }
         }
 
-       getGeneralAppService().getCollection(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.CollectionList>>{
+       getGeneralAppService(100).getCollection(userId).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.CollectionList>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<NetWorkResponse.CollectionList>>,
                 response: Response<NetWorkResponse<NetWorkResponse.CollectionList>>
@@ -294,14 +222,14 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.CollectionList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateArticleList())
             }
 
         })
     }
-    //给后端减轻一点负担了，进行一个类内部的回调了（会导致列表无序，得加锁才能解决，但是速度会变慢。）
+    //给后端减轻一点负担（会导致列表无序，得研究在过程中加锁才能解决，但是速度会变慢。）
     fun checkCollected(userId: Int, articleId: Int, onFeedBack: (isCollected: Boolean) -> Unit){
-       getGeneralAppService().checkCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
+       getGeneralAppService(100).checkCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<Any>>,
                 response: Response<NetWorkResponse<Any>>
@@ -320,7 +248,7 @@ object NetworkUtils {
         })
     }
     fun setCollection(userId: Int, articleId: Int){
-       getGeneralAppService().setCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
+       getGeneralAppService(100).setCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<Any>>,
                 response: Response<NetWorkResponse<Any>>
@@ -335,7 +263,7 @@ object NetworkUtils {
         })
     }
     fun deleteCollection(userId: Int, articleId: Int){
-       getGeneralAppService().deleteCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
+       getGeneralAppService(100).deleteCollection(userId, articleId).enqueue(object : Callback<NetWorkResponse<Any>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<Any>>,
                 response: Response<NetWorkResponse<Any>>
@@ -350,7 +278,7 @@ object NetworkUtils {
 
     //搜索药物
     fun searchMedByName(medName: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
-       getGeneralAppService().searchDrugByName(medName).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
+       getGeneralAppService(100).searchDrugByName(medName).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
             ) {
@@ -366,7 +294,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateMedData())
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
@@ -374,7 +302,7 @@ object NetworkUtils {
         })
     }
     fun searchMedByType(medType: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
-       getGeneralAppService().searchDrugByType(medType).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
+       getGeneralAppService(100).searchDrugByType(medType).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
             ) {
@@ -391,7 +319,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateMedData())
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
@@ -399,7 +327,7 @@ object NetworkUtils {
         })
     }
     fun searchMedByManufacturer(medManufacturer: String, onSuccess: (mMedList: ArrayList<MedData>) -> Unit, onFailure: () -> Unit){
-       getGeneralAppService().searchDrugByMedManufacturer(medManufacturer).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
+       getGeneralAppService(100).searchDrugByMedManufacturer(medManufacturer).enqueue(object : Callback<NetWorkResponse<NetWorkResponse.MedDataList>>{
 
             override fun onResponse(call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                                     response: Response<NetWorkResponse<NetWorkResponse.MedDataList>>
@@ -417,7 +345,7 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.MedDataList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateMedData())
                 t.printStackTrace()
                 makeWLog("suggestion medData list getting failed!!")
             }
@@ -427,7 +355,7 @@ object NetworkUtils {
 
     //文章的评论之获取
     fun getComment(articleId: Int, onSuccess: (commentList: ArrayList<CommentData>) -> Unit, onFailure: () -> Unit){
-        getGeneralAppService().getComments(articleId).enqueue(object: Callback<NetWorkResponse<NetWorkResponse.CommentList>>{
+        getGeneralAppService(100).getComments(articleId).enqueue(object: Callback<NetWorkResponse<NetWorkResponse.CommentList>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<NetWorkResponse.CommentList>>,
                 response: Response<NetWorkResponse<NetWorkResponse.CommentList>>
@@ -445,13 +373,13 @@ object NetworkUtils {
                 call: Call<NetWorkResponse<NetWorkResponse.CommentList>>,
                 t: Throwable
             ) {
-                onFailure()
+                onSuccess(GenerateTestContentUtils.generateCommentDataList())
                 makeWLog("get comment list on net failure!")
             }
         })
     }
     fun setComment(userId: Int, articleId: Int, comment: String){
-        getGeneralAppService().setComment(userId, articleId, comment).enqueue(object : Callback<NetWorkResponse<ResponseBody>>{
+        getGeneralAppService(100).setComment(userId, articleId, comment).enqueue(object : Callback<NetWorkResponse<ResponseBody>>{
             override fun onResponse(
                 call: Call<NetWorkResponse<ResponseBody>>,
                 response: Response<NetWorkResponse<ResponseBody>>
